@@ -1,5 +1,5 @@
-from PySide6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsPixmapItem
-from PySide6.QtGui import QPainter, QImage, QColor, QPixmap
+from PySide6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QGraphicsEllipseItem, QGraphicsTextItem
+from PySide6.QtGui import QPainter, QImage, QColor, QPixmap, QPen, QBrush, QFont
 from PySide6.QtCore import Qt
 
 BIOME_COLORS = {
@@ -18,18 +18,15 @@ class MapRenderer(QGraphicsView):
         self.scene = QGraphicsScene(self)
         self.setScene(self.scene)
         
-        # Enable dragging to pan
         self.setDragMode(QGraphicsView.ScrollHandDrag)
         self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
         
-        self.map_item = QGraphicsPixmapItem()
-        self.scene.addItem(self.map_item)
-
-    def draw_map(self, terrain_generator):
+    def draw_map(self, terrain_generator, region_generator=None):
+        self.scene.clear()
+        
         width = terrain_generator.width
         height = terrain_generator.height
         
-        # Create an image to draw the terrain pixel by pixel
         image = QImage(width, height, QImage.Format_RGB32)
         
         for y in range(height):
@@ -38,15 +35,55 @@ class MapRenderer(QGraphicsView):
                 color = BIOME_COLORS.get(biome, QColor("#000000"))
                 image.setPixelColor(x, y, color)
                 
-        # Update the pixmap
         pixmap = QPixmap.fromImage(image)
-        self.map_item.setPixmap(pixmap)
-        
-        # Adjust scene rect to match image
+        self.map_item = QGraphicsPixmapItem(pixmap)
+        self.scene.addItem(self.map_item)
         self.scene.setSceneRect(0, 0, width, height)
+        
+        if region_generator:
+            self._draw_locations(region_generator.locations)
+
+    def _draw_locations(self, locations):
+        for loc in locations:
+            x, y = loc['x'], loc['y']
+            loc_type = loc['type']
+            name = loc['name']
+            
+            size = 6
+            color = QColor("#FFFFFF")
+            if loc_type == "Kingdom":
+                size = 12
+                color = QColor("#FFD700")
+            elif loc_type == "Village":
+                size = 6
+                color = QColor("#8D6E63")
+            elif loc_type == "Castle":
+                size = 10
+                color = QColor("#E0E0E0")
+            elif loc_type == "Dungeon":
+                size = 8
+                color = QColor("#E53935")
+            elif loc_type == "Ruin":
+                size = 7
+                color = QColor("#9E9E9E")
+                
+            ellipse = QGraphicsEllipseItem(x - size/2, y - size/2, size, size)
+            ellipse.setBrush(QBrush(color))
+            ellipse.setPen(QPen(Qt.black))
+            ellipse.setToolTip(f"{name} ({loc_type})")
+            
+            self.scene.addItem(ellipse)
+            
+            # Draw text label for Kingdoms
+            if loc_type == "Kingdom":
+                text = QGraphicsTextItem(name)
+                text.setDefaultTextColor(Qt.black)
+                font = QFont("Arial", 8, QFont.Bold)
+                text.setFont(font)
+                text.setPos(x - text.boundingRect().width()/2, y + size/2)
+                self.scene.addItem(text)
 
     def wheelEvent(self, event):
-        # Zoom functionality
         zoom_in_factor = 1.15
         zoom_out_factor = 1 / zoom_in_factor
         

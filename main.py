@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout,
                                QVBoxLayout, QPushButton, QLabel, QLineEdit, QGroupBox)
 from PySide6.QtCore import Qt
 from terrain_generator import TerrainGenerator
+from region_generator import RegionGenerator
 from renderer import MapRenderer
 
 class RealmGenMainWindow(QMainWindow):
@@ -70,17 +71,22 @@ class RealmGenMainWindow(QMainWindow):
         self.status_label.setText("Generating terrain...")
         QApplication.processEvents() # Force UI update
         
-        # Map resolution
         width, height = 512, 512
         
         self.terrain = TerrainGenerator(width, height, seed)
         self.terrain.generate()
         
+        self.status_label.setText("Populating world...")
+        QApplication.processEvents()
+        
+        self.regions = RegionGenerator(self.terrain, seed)
+        self.regions.generate_locations()
+        
         self.status_label.setText("Drawing map...")
         QApplication.processEvents()
         
-        self.map_renderer.draw_map(self.terrain)
-        self.status_label.setText("Generation complete!")
+        self.map_renderer.draw_map(self.terrain, self.regions)
+        self.status_label.setText(f"Generation complete! {len(self.regions.locations)} locations found.")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
