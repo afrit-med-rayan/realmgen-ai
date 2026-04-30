@@ -8,9 +8,74 @@ from region_generator import RegionGenerator
 from renderer import MapRenderer
 from save_manager import SaveManager
 
+STYLESHEET = """
+QMainWindow {
+    background-color: #1E1E1E;
+}
+QWidget {
+    color: #D4D4D4;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+QGroupBox {
+    border: 1px solid #3E3E42;
+    border-radius: 4px;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #007ACC;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 5px;
+}
+QPushButton {
+    background-color: #333337;
+    border: 1px solid #3E3E42;
+    border-radius: 2px;
+    padding: 6px;
+    min-height: 20px;
+    color: #D4D4D4;
+}
+QPushButton:hover {
+    background-color: #3E3E42;
+    border-color: #007ACC;
+}
+QPushButton:pressed {
+    background-color: #007ACC;
+    color: white;
+}
+QLineEdit {
+    background-color: #252526;
+    border: 1px solid #3E3E42;
+    border-radius: 2px;
+    padding: 4px;
+    color: #D4D4D4;
+}
+QLineEdit:focus {
+    border: 1px solid #007ACC;
+}
+QLabel {
+    font-size: 12px;
+}
+QCheckBox {
+    spacing: 8px;
+}
+QCheckBox::indicator {
+    width: 14px;
+    height: 14px;
+    background-color: #252526;
+    border: 1px solid #3E3E42;
+}
+QCheckBox::indicator:checked {
+    background-color: #007ACC;
+    border: 1px solid #007ACC;
+}
+"""
+
 class RealmGenMainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.setStyleSheet(STYLESHEET)
         self.setWindowTitle("RealmGen AI - Fantasy World Generator")
         self.setGeometry(100, 100, 1280, 720)
         

@@ -3,13 +3,13 @@ from PySide6.QtGui import QPainter, QImage, QColor, QPixmap, QPen, QBrush, QFont
 from PySide6.QtCore import Qt, Signal
 
 BIOME_COLORS = {
-    "Ocean": QColor("#1E88E5"),
-    "Mountains": QColor("#757575"),
-    "Desert": QColor("#FFD54F"),
-    "Swamp": QColor("#556B2F"),
-    "Forest": QColor("#2E7D32"),
-    "Tundra": QColor("#CFD8DC"),
-    "Plains": QColor("#81C784")
+    "Ocean": QColor("#0D47A1"),     # Deep Blue
+    "Mountains": QColor("#546E7A"), # Blue Grey
+    "Desert": QColor("#FBC02D"),    # Amber/Yellow
+    "Swamp": QColor("#2E7D32"),     # Dark Green
+    "Forest": QColor("#1B5E20"),    # Deep Green
+    "Tundra": QColor("#B0BEC5"),    # Blue Grey Light
+    "Plains": QColor("#689F38")     # Light Green
 }
 
 class MapRenderer(QGraphicsView):
