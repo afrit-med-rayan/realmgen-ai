@@ -22,9 +22,20 @@ class MapRenderer(QGraphicsView):
         
         self.setDragMode(QGraphicsView.ScrollHandDrag)
         self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
+        self.location_items = []
+        
+    def filter_locations(self, search_text, visible_types):
+        search_text = search_text.lower()
+        for item in self.location_items:
+            loc = getattr(item, "location_data", None)
+            if loc:
+                matches_search = search_text in loc['name'].lower() if search_text else True
+                matches_type = loc['type'] in visible_types
+                item.setVisible(matches_search and matches_type)
         
     def draw_map(self, terrain_generator, region_generator=None):
         self.scene.clear()
+        self.location_items.clear()
         
         width = terrain_generator.width
         height = terrain_generator.height
@@ -76,6 +87,7 @@ class MapRenderer(QGraphicsView):
             ellipse.location_data = loc
             
             self.scene.addItem(ellipse)
+            self.location_items.append(ellipse)
             
             # Draw text label for Kingdoms
             if loc_type == "Kingdom":
@@ -86,6 +98,7 @@ class MapRenderer(QGraphicsView):
                 text.setFont(font)
                 text.setPos(x - text.boundingRect().width()/2, y + size/2)
                 self.scene.addItem(text)
+                self.location_items.append(text)
 
     def wheelEvent(self, event):
         zoom_in_factor = 1.15

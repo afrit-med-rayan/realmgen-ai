@@ -1,7 +1,7 @@
 import sys
 import random
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, 
-                               QVBoxLayout, QPushButton, QLabel, QLineEdit, QGroupBox, QFileDialog)
+                               QVBoxLayout, QPushButton, QLabel, QLineEdit, QGroupBox, QFileDialog, QCheckBox)
 from PySide6.QtCore import Qt
 from terrain_generator import TerrainGenerator
 from region_generator import RegionGenerator
@@ -59,6 +59,25 @@ class RealmGenMainWindow(QMainWindow):
         self.action_layout.addWidget(self.export_btn)
         
         self.control_layout.addWidget(self.action_group)
+        
+        # Filter Group
+        self.filter_group = QGroupBox("Filters & Search")
+        self.filter_layout = QVBoxLayout(self.filter_group)
+        
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Search by name...")
+        self.search_input.textChanged.connect(self.update_filters)
+        self.filter_layout.addWidget(self.search_input)
+        
+        self.type_filters = {}
+        for loc_type in ["Kingdom", "Village", "Castle", "Dungeon", "Ruin"]:
+            cb = QCheckBox(loc_type)
+            cb.setChecked(True)
+            cb.stateChanged.connect(self.update_filters)
+            self.filter_layout.addWidget(cb)
+            self.type_filters[loc_type] = cb
+            
+        self.control_layout.addWidget(self.filter_group)
         
         # Detail Panel
         self.detail_group = QGroupBox("Location Details")
@@ -146,6 +165,11 @@ class RealmGenMainWindow(QMainWindow):
         if filepath:
             self.save_manager.export_to_png(filepath, self.map_renderer)
             self.status_label.setText("Exported successfully.")
+
+    def update_filters(self):
+        search_text = self.search_input.text()
+        visible_types = [t for t, cb in self.type_filters.items() if cb.isChecked()]
+        self.map_renderer.filter_locations(search_text, visible_types)
 
     def generate_random_seed(self):
         self.seed_input.setText(str(random.randint(0, 999999)))
