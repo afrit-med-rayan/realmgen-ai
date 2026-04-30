@@ -1,11 +1,12 @@
 import sys
 import random
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, 
-                               QVBoxLayout, QPushButton, QLabel, QLineEdit, QGroupBox)
+                               QVBoxLayout, QPushButton, QLabel, QLineEdit, QGroupBox, QFileDialog)
 from PySide6.QtCore import Qt
 from terrain_generator import TerrainGenerator
 from region_generator import RegionGenerator
 from renderer import MapRenderer
+from save_manager import SaveManager
 
 class RealmGenMainWindow(QMainWindow):
     def __init__(self):
@@ -38,12 +39,24 @@ class RealmGenMainWindow(QMainWindow):
         self.control_layout.addWidget(self.seed_group)
         
         # Action Group
-        self.action_group = QGroupBox("Generation")
+        self.action_group = QGroupBox("Actions")
         self.action_layout = QVBoxLayout(self.action_group)
         
         self.generate_btn = QPushButton("Generate World")
         self.generate_btn.clicked.connect(self.generate_world)
         self.action_layout.addWidget(self.generate_btn)
+
+        self.save_btn = QPushButton("Save World")
+        self.save_btn.clicked.connect(self.save_world_data)
+        self.action_layout.addWidget(self.save_btn)
+
+        self.load_btn = QPushButton("Load World")
+        self.load_btn.clicked.connect(self.load_world_data)
+        self.action_layout.addWidget(self.load_btn)
+
+        self.export_btn = QPushButton("Export to PNG")
+        self.export_btn.clicked.connect(self.export_png)
+        self.action_layout.addWidget(self.export_btn)
         
         self.control_layout.addWidget(self.action_group)
         
@@ -78,6 +91,7 @@ class RealmGenMainWindow(QMainWindow):
         
         self.main_layout.addWidget(self.control_panel)
         self.main_layout.addWidget(self.map_renderer)
+        self.save_manager = SaveManager()
 
     def display_location_details(self, loc_data):
         self.detail_name_label.setText(f"Name: {loc_data.get('name', 'Unknown')}")
@@ -88,6 +102,50 @@ class RealmGenMainWindow(QMainWindow):
         self.detail_ruler_label.setText(f"Ruler: {lore.get('ruler', 'Unknown')}")
         self.detail_danger_label.setText(f"Danger: {loc_data.get('danger_level', 'Unknown')}")
         self.detail_lore_label.setText(f"Lore: {lore.get('description', 'None')}")
+
+    def save_world_data(self):
+        if not hasattr(self, 'terrain') or not hasattr(self, 'regions'):
+            self.status_label.setText("No world to save!")
+            return
+            
+        filepath, _ = QFileDialog.getSaveFileName(self, "Save World", "", "JSON Files (*.json)")
+        if filepath:
+            world_data = {
+                "seed": self.terrain.seed,
+                "width": self.terrain.width,
+                "height": self.terrain.height,
+                "locations": self.regions.locations
+            }
+            self.save_manager.save_world(filepath, world_data)
+            self.status_label.setText("World saved successfully.")
+
+    def load_world_data(self):
+        filepath, _ = QFileDialog.getOpenFileName(self, "Load World", "", "JSON Files (*.json)")
+        if filepath:
+            try:
+                world_data = self.save_manager.load_world(filepath)
+                seed = world_data["seed"]
+                width = world_data["width"]
+                height = world_data["height"]
+                self.seed_input.setText(str(seed))
+                
+                self.terrain = TerrainGenerator(width, height, seed)
+                self.terrain.generate()
+                
+                self.regions = RegionGenerator(self.terrain, seed)
+                # Override locations with loaded locations
+                self.regions.locations = world_data.get("locations", [])
+                
+                self.map_renderer.draw_map(self.terrain, self.regions)
+                self.status_label.setText("World loaded successfully.")
+            except Exception as e:
+                self.status_label.setText(f"Error loading world: {e}")
+
+    def export_png(self):
+        filepath, _ = QFileDialog.getSaveFileName(self, "Export to PNG", "", "PNG Images (*.png)")
+        if filepath:
+            self.save_manager.export_to_png(filepath, self.map_renderer)
+            self.status_label.setText("Exported successfully.")
 
     def generate_random_seed(self):
         self.seed_input.setText(str(random.randint(0, 999999)))
