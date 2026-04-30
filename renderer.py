@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QGraphicsEllipseItem, QGraphicsTextItem
 from PySide6.QtGui import QPainter, QImage, QColor, QPixmap, QPen, QBrush, QFont
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 
 BIOME_COLORS = {
     "Ocean": QColor("#1E88E5"),
@@ -13,6 +13,8 @@ BIOME_COLORS = {
 }
 
 class MapRenderer(QGraphicsView):
+    location_clicked = Signal(dict)
+    
     def __init__(self, parent=None):
         super().__init__(parent)
         self.scene = QGraphicsScene(self)
@@ -71,12 +73,14 @@ class MapRenderer(QGraphicsView):
             ellipse.setBrush(QBrush(color))
             ellipse.setPen(QPen(Qt.black))
             ellipse.setToolTip(f"{name} ({loc_type})")
+            ellipse.location_data = loc
             
             self.scene.addItem(ellipse)
             
             # Draw text label for Kingdoms
             if loc_type == "Kingdom":
                 text = QGraphicsTextItem(name)
+                text.location_data = loc
                 text.setDefaultTextColor(Qt.black)
                 font = QFont("Arial", 8, QFont.Bold)
                 text.setFont(font)
@@ -93,3 +97,10 @@ class MapRenderer(QGraphicsView):
             zoom_factor = zoom_out_factor
             
         self.scale(zoom_factor, zoom_factor)
+
+    def mousePressEvent(self, event):
+        item = self.itemAt(event.pos())
+        if hasattr(item, "location_data"):
+            self.location_clicked.emit(item.location_data)
+        super().mousePressEvent(event)
+

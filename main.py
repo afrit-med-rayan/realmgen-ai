@@ -47,15 +47,47 @@ class RealmGenMainWindow(QMainWindow):
         
         self.control_layout.addWidget(self.action_group)
         
+        # Detail Panel
+        self.detail_group = QGroupBox("Location Details")
+        self.detail_layout = QVBoxLayout(self.detail_group)
+        
+        self.detail_name_label = QLabel("Name: None")
+        self.detail_type_label = QLabel("Type: None")
+        self.detail_biome_label = QLabel("Biome: None")
+        self.detail_ruler_label = QLabel("Ruler: None")
+        self.detail_danger_label = QLabel("Danger: None")
+        self.detail_lore_label = QLabel("Lore: None")
+        self.detail_lore_label.setWordWrap(True)
+        
+        self.detail_layout.addWidget(self.detail_name_label)
+        self.detail_layout.addWidget(self.detail_type_label)
+        self.detail_layout.addWidget(self.detail_biome_label)
+        self.detail_layout.addWidget(self.detail_ruler_label)
+        self.detail_layout.addWidget(self.detail_danger_label)
+        self.detail_layout.addWidget(self.detail_lore_label)
+        
+        self.control_layout.addWidget(self.detail_group)
+        
         # Status Label
         self.status_label = QLabel("Ready.")
         self.control_layout.addWidget(self.status_label)
         
         # --- Right Map Viewer ---
         self.map_renderer = MapRenderer()
+        self.map_renderer.location_clicked.connect(self.display_location_details)
         
         self.main_layout.addWidget(self.control_panel)
         self.main_layout.addWidget(self.map_renderer)
+
+    def display_location_details(self, loc_data):
+        self.detail_name_label.setText(f"Name: {loc_data.get('name', 'Unknown')}")
+        self.detail_type_label.setText(f"Type: {loc_data.get('type', 'Unknown')}")
+        self.detail_biome_label.setText(f"Biome: {loc_data.get('biome', 'Unknown')}")
+        
+        lore = loc_data.get('lore', {})
+        self.detail_ruler_label.setText(f"Ruler: {lore.get('ruler', 'Unknown')}")
+        self.detail_danger_label.setText(f"Danger: {loc_data.get('danger_level', 'Unknown')}")
+        self.detail_lore_label.setText(f"Lore: {lore.get('description', 'None')}")
 
     def generate_random_seed(self):
         self.seed_input.setText(str(random.randint(0, 999999)))
