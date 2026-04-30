@@ -1,11 +1,13 @@
 import random
 from name_generator import NameGenerator
+from lore_generator import LoreGenerator
 
 class RegionGenerator:
     def __init__(self, terrain_data, seed: int):
         self.terrain_data = terrain_data
         self.rng = random.Random(seed)
         self.name_gen = NameGenerator(seed)
+        self.lore_gen = LoreGenerator(seed)
         self.locations = []
         
     def generate_locations(self, num_attempts=1000):
@@ -27,13 +29,15 @@ class RegionGenerator:
                 
                 # Check minimum distance to avoid overlapping
                 if not self._is_too_close(x, y):
+                    lore = self.lore_gen.generate_lore(location_type, biome, danger)
                     self.locations.append({
                         "name": name,
                         "x": x,
                         "y": y,
                         "type": location_type,
                         "biome": biome,
-                        "danger_level": danger
+                        "danger_level": danger,
+                        "lore": lore
                     })
                     
     def _determine_location_type(self, biome: str):
