@@ -167,6 +167,24 @@ class RealmGenMainWindow(QMainWindow):
             
         self.control_layout.addWidget(self.filter_group)
         
+        # Legend Group
+        self.legend_group = QGroupBox("Legend")
+        self.legend_layout = QVBoxLayout(self.legend_group)
+        
+        legend_items = [
+            ("Kingdom", "#FFD700", "Gold"),
+            ("Castle", "#9E9E9E", "Silver"),
+            ("Dungeon", "#E53935", "Red"),
+            ("Village", "#D2B48C", "Tan"),
+            ("Ruin", "#795548", "Brown")
+        ]
+        for name, color, color_name in legend_items:
+            lbl = QLabel(f"■ {name}")
+            lbl.setStyleSheet(f"color: {color}; font-weight: bold; font-size: 15px;")
+            self.legend_layout.addWidget(lbl)
+            
+        self.control_layout.addWidget(self.legend_group)
+        
         # Detail Panel
         self.detail_group = QGroupBox("Location Details")
         self.detail_layout = QVBoxLayout(self.detail_group)
@@ -270,25 +288,32 @@ class RealmGenMainWindow(QMainWindow):
             seed = random.randint(0, 999999)
             self.seed_input.setText(str(seed))
             
-        self.status_label.setText("Generating terrain...")
-        QApplication.processEvents() # Force UI update
+        self.generate_btn.setEnabled(False)
+        QApplication.setOverrideCursor(Qt.WaitCursor)
         
-        width, height = 512, 512
-        
-        self.terrain = TerrainGenerator(width, height, seed)
-        self.terrain.generate()
-        
-        self.status_label.setText("Populating world...")
-        QApplication.processEvents()
-        
-        self.regions = RegionGenerator(self.terrain, seed)
-        self.regions.generate_locations()
-        
-        self.status_label.setText("Drawing map...")
-        QApplication.processEvents()
-        
-        self.map_renderer.draw_map(self.terrain, self.regions)
-        self.status_label.setText(f"Generation complete! {len(self.regions.locations)} locations found.")
+        try:
+            self.status_label.setText("Generating terrain... Please wait.")
+            QApplication.processEvents() # Force UI update
+            
+            width, height = 512, 512
+            
+            self.terrain = TerrainGenerator(width, height, seed)
+            self.terrain.generate()
+            
+            self.status_label.setText("Populating world... Please wait.")
+            QApplication.processEvents()
+            
+            self.regions = RegionGenerator(self.terrain, seed)
+            self.regions.generate_locations()
+            
+            self.status_label.setText("Drawing map... Please wait.")
+            QApplication.processEvents()
+            
+            self.map_renderer.draw_map(self.terrain, self.regions)
+            self.status_label.setText(f"Generation complete! {len(self.regions.locations)} locations found.")
+        finally:
+            QApplication.restoreOverrideCursor()
+            self.generate_btn.setEnabled(True)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
