@@ -10,65 +10,88 @@ from save_manager import SaveManager
 
 STYLESHEET = """
 QMainWindow {
-    background-color: #1E1E1E;
+    background-color: #121016;
 }
 QWidget {
-    color: #D4D4D4;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #E2D9E8;
+    font-family: 'Cambria', 'Georgia', serif;
+    font-size: 14px;
 }
 QGroupBox {
-    border: 1px solid #3E3E42;
-    border-radius: 4px;
-    margin-top: 15px;
-    font-weight: bold;
-    color: #007ACC;
+    background-color: #1C1924;
+    border: 1px solid #3A3248;
+    border-radius: 8px;
+    margin-top: 25px;
+    padding: 15px 10px 10px 10px;
 }
 QGroupBox::title {
     subcontrol-origin: margin;
-    left: 10px;
-    padding: 0 5px;
+    subcontrol-position: top center;
+    padding: 2px 15px;
+    color: #D4AF37;
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 1px;
 }
 QPushButton {
-    background-color: #333337;
-    border: 1px solid #3E3E42;
-    border-radius: 2px;
-    padding: 6px;
-    min-height: 20px;
-    color: #D4D4D4;
+    background-color: #2B2338;
+    border: 1px solid #483C5C;
+    border-radius: 4px;
+    padding: 10px 12px;
+    color: #E2D9E8;
+    font-weight: bold;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 13px;
+    margin-bottom: 4px;
 }
 QPushButton:hover {
-    background-color: #3E3E42;
-    border-color: #007ACC;
+    background-color: #3C3050;
+    border-color: #D4AF37;
+    color: #FFF;
 }
 QPushButton:pressed {
-    background-color: #007ACC;
-    color: white;
+    background-color: #D4AF37;
+    color: #121016;
 }
 QLineEdit {
-    background-color: #252526;
-    border: 1px solid #3E3E42;
-    border-radius: 2px;
-    padding: 4px;
-    color: #D4D4D4;
+    background-color: #0E0C12;
+    border: 1px solid #3A3248;
+    border-radius: 4px;
+    padding: 8px;
+    color: #E2D9E8;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 13px;
+    margin-bottom: 4px;
 }
 QLineEdit:focus {
-    border: 1px solid #007ACC;
+    border: 1px solid #D4AF37;
 }
 QLabel {
-    font-size: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 2px 0;
 }
 QCheckBox {
     spacing: 8px;
+    font-size: 14px;
+    font-family: 'Segoe UI', sans-serif;
+    margin-bottom: 4px;
 }
 QCheckBox::indicator {
-    width: 14px;
-    height: 14px;
-    background-color: #252526;
-    border: 1px solid #3E3E42;
+    width: 16px;
+    height: 16px;
+    background-color: #0E0C12;
+    border: 1px solid #3A3248;
+    border-radius: 3px;
 }
 QCheckBox::indicator:checked {
-    background-color: #007ACC;
-    border: 1px solid #007ACC;
+    background-color: #D4AF37;
+    border: 1px solid #D4AF37;
+}
+QGraphicsView {
+    border: 2px solid #3A3248;
+    border-radius: 8px;
+    background-color: #0B0A10;
 }
 """
 
