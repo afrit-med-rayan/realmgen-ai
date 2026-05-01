@@ -46,22 +46,7 @@ class MapRenderer(QGraphicsView):
         for y in range(height):
             for x in range(width):
                 biome = terrain_generator.biome_map[y][x]
-                elev = terrain_generator.elevation_map[y][x]
-                base_color = BIOME_COLORS.get(biome, QColor("#000000"))
-                
-                h, s, l, a = base_color.getHslF()
-                
-                # Quantize elevation for pixel art "banding" effect
-                elev_quantized = round(elev * 10) / 10.0
-                
-                if biome == "Ocean":
-                    l = max(0.05, l + elev_quantized * 0.4)
-                elif biome == "Mountains":
-                    l = min(0.95, l + (elev_quantized - 0.3) * 1.2)
-                else:
-                    l = max(0.1, min(0.9, l + (elev_quantized * 0.15)))
-                
-                color = QColor.fromHslF(h, s, l, a)
+                color = BIOME_COLORS.get(biome, QColor("#000000"))
                 image.setPixelColor(x, y, color)
                 
         pixmap = QPixmap.fromImage(image)
@@ -84,24 +69,24 @@ class MapRenderer(QGraphicsView):
             pen_width = 1
             
             if loc_type == "Kingdom":
-                size = 14
+                size = 12
                 color = QColor("#FFD700") # Gold
                 pen_width = 2
             elif loc_type == "Village":
-                size = 8
+                size = 6
                 color = QColor("#D2B48C") # Tan
                 pen_color = QColor("#3E2723")
             elif loc_type == "Castle":
-                size = 12
+                size = 10
                 color = QColor("#9E9E9E") # Silver/Grey
                 pen_width = 2
             elif loc_type == "Dungeon":
-                size = 10
+                size = 8
                 color = QColor("#E53935") # Red
                 pen_color = QColor("#4A148C")
                 pen_width = 2
             elif loc_type == "Ruin":
-                size = 8
+                size = 6
                 color = QColor("#795548") # Brown
                 pen_color = QColor("#212121")
                 
@@ -120,26 +105,31 @@ class MapRenderer(QGraphicsView):
             self.location_items.append(rect)
             
             if loc_type == "Kingdom":
-                # Pixel art font styling (using a basic clear font)
-                font = QFont("Courier New", 9, QFont.Bold)
+                font = QFont("Courier New", 8, QFont.Bold)
                 font.setStyleHint(QFont.Monospace)
                 
-                # Sharp 1px shadow offset
-                shadow = QGraphicsTextItem(name)
-                shadow.setDefaultTextColor(QColor(0, 0, 0, 255))
-                shadow.setFont(font)
-                shadow.setPos(x - shadow.boundingRect().width()/2 + 1, y + size//2 + 1)
-                shadow.location_data = loc
-                self.scene.addItem(shadow)
-                self.location_items.append(shadow)
-                
+                # Create text item
                 text = QGraphicsTextItem(name)
                 text.location_data = loc
                 text.setDefaultTextColor(QColor("#FFFFFF"))
                 text.setFont(font)
-                text.setPos(x - text.boundingRect().width()/2, y + size//2)
+                
+                # Add a black background for the text for readability
+                bg = QGraphicsRectItem(text.boundingRect())
+                bg.setBrush(QBrush(QColor(0, 0, 0, 180)))
+                bg.setPen(Qt.NoPen)
+                bg.location_data = loc
+                
+                text_width = text.boundingRect().width()
+                text_x = x - text_width/2
+                text_y = y + size//2
+                
+                bg.setPos(text_x, text_y)
+                text.setPos(text_x, text_y)
+                
+                self.scene.addItem(bg)
                 self.scene.addItem(text)
-                self.location_items.append(text)
+                self.location_items.extend([bg, text])
 
     def wheelEvent(self, event):
         zoom_in_factor = 1.15

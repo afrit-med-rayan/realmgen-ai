@@ -1,7 +1,8 @@
 import sys
 import random
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, 
-                               QVBoxLayout, QPushButton, QLabel, QLineEdit, QGroupBox, QFileDialog, QCheckBox)
+                               QVBoxLayout, QPushButton, QLabel, QLineEdit, QGroupBox, 
+                               QFileDialog, QCheckBox, QScrollArea)
 from PySide6.QtCore import Qt
 from terrain_generator import TerrainGenerator
 from region_generator import RegionGenerator
@@ -108,7 +109,6 @@ class RealmGenMainWindow(QMainWindow):
         
         # --- Left Control Panel ---
         self.control_panel = QWidget()
-        self.control_panel.setFixedWidth(250)
         self.control_layout = QVBoxLayout(self.control_panel)
         self.control_layout.setAlignment(Qt.AlignTop)
         
@@ -210,11 +210,19 @@ class RealmGenMainWindow(QMainWindow):
         self.status_label = QLabel("Ready.")
         self.control_layout.addWidget(self.status_label)
         
+        # Wrap control panel in Scroll Area
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidget(self.control_panel)
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setFixedWidth(290)
+        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll_area.setStyleSheet("QScrollArea { border: none; background-color: #121016; }")
+        
         # --- Right Map Viewer ---
         self.map_renderer = MapRenderer()
         self.map_renderer.location_clicked.connect(self.display_location_details)
         
-        self.main_layout.addWidget(self.control_panel)
+        self.main_layout.addWidget(self.scroll_area)
         self.main_layout.addWidget(self.map_renderer)
         self.save_manager = SaveManager()
 
