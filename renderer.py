@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QGraphicsEllipseItem, QGraphicsTextItem
+from PySide6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QGraphicsRectItem, QGraphicsTextItem
 from PySide6.QtGui import QPainter, QImage, QColor, QPixmap, QPen, QBrush, QFont
 from PySide6.QtCore import Qt, Signal
 
@@ -22,7 +22,7 @@ class MapRenderer(QGraphicsView):
         
         self.setDragMode(QGraphicsView.ScrollHandDrag)
         self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
-        self.setRenderHint(QPainter.Antialiasing)
+        # Pixel art style: no antialiasing
         self.location_items = []
         
     def filter_locations(self, search_text, visible_types):
@@ -51,12 +51,15 @@ class MapRenderer(QGraphicsView):
                 
                 h, s, l, a = base_color.getHslF()
                 
+                # Quantize elevation for pixel art "banding" effect
+                elev_quantized = round(elev * 10) / 10.0
+                
                 if biome == "Ocean":
-                    l = max(0.05, l + elev * 0.4)
+                    l = max(0.05, l + elev_quantized * 0.4)
                 elif biome == "Mountains":
-                    l = min(0.95, l + (elev - 0.35) * 1.2)
+                    l = min(0.95, l + (elev_quantized - 0.3) * 1.2)
                 else:
-                    l = max(0.1, min(0.9, l + (elev * 0.15)))
+                    l = max(0.1, min(0.9, l + (elev_quantized * 0.15)))
                 
                 color = QColor.fromHslF(h, s, l, a)
                 image.setPixelColor(x, y, color)
@@ -71,7 +74,7 @@ class MapRenderer(QGraphicsView):
 
     def _draw_locations(self, locations):
         for loc in locations:
-            x, y = loc['x'], loc['y']
+            x, y = int(loc['x']), int(loc['y'])
             loc_type = loc['type']
             name = loc['name']
             
@@ -98,28 +101,34 @@ class MapRenderer(QGraphicsView):
                 pen_color = QColor("#4A148C")
                 pen_width = 2
             elif loc_type == "Ruin":
-                size = 9
+                size = 8
                 color = QColor("#795548") # Brown
                 pen_color = QColor("#212121")
                 
-            ellipse = QGraphicsEllipseItem(x - size/2, y - size/2, size, size)
-            ellipse.setBrush(QBrush(color))
+            # Pixel art style uses sharp rectangles
+            rect = QGraphicsRectItem(x - size//2, y - size//2, size, size)
+            rect.setBrush(QBrush(color))
             pen = QPen(pen_color)
             pen.setWidth(pen_width)
-            ellipse.setPen(pen)
-            ellipse.setToolTip(f"{name} ({loc_type})")
-            ellipse.location_data = loc
+            # Square corners for pen
+            pen.setJoinStyle(Qt.MiterJoin)
+            rect.setPen(pen)
+            rect.setToolTip(f"{name} ({loc_type})")
+            rect.location_data = loc
             
-            self.scene.addItem(ellipse)
-            self.location_items.append(ellipse)
+            self.scene.addItem(rect)
+            self.location_items.append(rect)
             
             if loc_type == "Kingdom":
-                font = QFont("Georgia", 9, QFont.Bold)
+                # Pixel art font styling (using a basic clear font)
+                font = QFont("Courier New", 9, QFont.Bold)
+                font.setStyleHint(QFont.Monospace)
                 
+                # Sharp 1px shadow offset
                 shadow = QGraphicsTextItem(name)
-                shadow.setDefaultTextColor(QColor(0, 0, 0, 200))
+                shadow.setDefaultTextColor(QColor(0, 0, 0, 255))
                 shadow.setFont(font)
-                shadow.setPos(x - shadow.boundingRect().width()/2 + 1, y + size/2 + 1)
+                shadow.setPos(x - shadow.boundingRect().width()/2 + 1, y + size//2 + 1)
                 shadow.location_data = loc
                 self.scene.addItem(shadow)
                 self.location_items.append(shadow)
@@ -128,7 +137,7 @@ class MapRenderer(QGraphicsView):
                 text.location_data = loc
                 text.setDefaultTextColor(QColor("#FFFFFF"))
                 text.setFont(font)
-                text.setPos(x - text.boundingRect().width()/2, y + size/2)
+                text.setPos(x - text.boundingRect().width()/2, y + size//2)
                 self.scene.addItem(text)
                 self.location_items.append(text)
 
