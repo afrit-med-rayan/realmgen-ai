@@ -2,7 +2,7 @@ import sys
 import random
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, 
                                QVBoxLayout, QPushButton, QLabel, QLineEdit, QGroupBox, 
-                               QFileDialog, QCheckBox, QScrollArea)
+                               QFileDialog, QCheckBox, QScrollArea, QSizePolicy)
 from PySide6.QtCore import Qt
 from terrain_generator import TerrainGenerator
 from region_generator import RegionGenerator
@@ -196,6 +196,8 @@ class RealmGenMainWindow(QMainWindow):
         self.detail_danger_label = QLabel("Danger: None")
         self.detail_lore_label = QLabel("Lore: None")
         self.detail_lore_label.setWordWrap(True)
+        self.detail_lore_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
+        self.detail_lore_label.setMinimumHeight(80)
         
         self.detail_layout.addWidget(self.detail_name_label)
         self.detail_layout.addWidget(self.detail_type_label)
